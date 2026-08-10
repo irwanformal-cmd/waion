@@ -1,19 +1,9 @@
-/**
- * Canonical, safe API error contract.
- * `detail` is logged server-side only and NEVER sent to clients.
- */
-export type ApiErrorCode =
-  | "UNAUTHENTICATED"
-  | "FORBIDDEN"
-  | "NOT_FOUND"
-  | "INVALID_INPUT"
-  | "RATE_LIMITED"
-  | "QUOTA_EXCEEDED"
-  | "PAYLOAD_TOO_LARGE"
-  | "BAD_REQUEST"
-  | "CONFLICT"
-  | "INTERNAL";
+import type { ApiErrorCode } from "@wai/shared";
 
+/**
+ * Server-side error type. `detail` is logged only and NEVER sent to clients;
+ * clients receive the shared { error: { code, message } } contract.
+ */
 export class ApiError extends Error {
   readonly code: ApiErrorCode;
   readonly status: number;

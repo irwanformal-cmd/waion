@@ -20,7 +20,8 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@wai/shared": ["./packages/shared/src/index.ts"]
     }
   },
   "include": [

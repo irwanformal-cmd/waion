@@ -73,7 +73,7 @@ export const auth = betterAuth({
     customRules: {
       // Stricter limits on the brute-force surface.
       "/sign-in/email": { window: 60, max: 8 },
-      "/sign-up/email": { window: 3600, max: 5 },
+      "/sign-up/email": { window: 3600, max: env.SIGN_UP_RATE_LIMIT_MAX },
       "/forget-password": { window: 3600, max: 5 },
       "/reset-password": { window: 3600, max: 5 },
       "/send-verification-email": { window: 3600, max: 5 },
