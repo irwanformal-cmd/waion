@@ -1,0 +1,24 @@
+# Dev database for local development (parity with CI; notes only).
+# THE CREDENTIALS HERE ARE FOR LOCAL DEVELOPMENT ONLY — never reuse in prod.
+# This host runs a local Homebrew PostgreSQL instead; compose file kept for
+# environments without a local server (CI, other machines).
+services:
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: app_password
+      POSTGRES_DB: ai_startup
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U app -d ai_startup"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  pgdata:

@@ -1,0 +1,32 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  quality:
+    name: Lint, typecheck and build
+    runs-on: ubuntu-latest
+    env:
+      # Placeholders only — CI must never receive real secrets.
+      DATABASE_URL: postgresql://ci:ci@localhost:5432/ci_db
+      AUTH_SECRET: ci-only-placeholder-secret-not-used-in-prod
+      AI_PROVIDER: openai
+      AI_MODEL: gpt-4o-mini
+      AI_API_KEY: placeholder
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
+      TRUSTED_ORIGINS: ""
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npx tsc --noEmit
+      - run: npm run build
+      - name: Dependency vulnerability check
+        run: npm audit --audit-level=high
