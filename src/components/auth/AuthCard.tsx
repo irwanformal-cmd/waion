@@ -70,7 +70,7 @@ export function AuthCard({ mode }: { mode: Mode }) {
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center px-4">
-      <Link href="/" className="mb-8" aria-label="WAIan home">
+      <Link href="/" className="mb-8" aria-label="WAIon home">
         <Logo />
       </Link>
 

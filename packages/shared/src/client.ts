@@ -1,5 +1,5 @@
 /**
- * Framework-agnostic WAIan API client. Safe for web, desktop, and mobile:
+ * Framework-agnostic WAIon API client. Safe for web, desktop, and mobile:
  * no Node APIs, no cookies handling, no secrets. Web uses same-origin fetch
  * (cookies flow automatically); desktop/mobile pass baseUrl + optional token.
  */

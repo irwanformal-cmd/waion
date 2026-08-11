@@ -22,7 +22,7 @@ export function Logo({ className = "" }: { className?: string }) {
         />
       </svg>
       <span className="text-lg font-semibold tracking-tight text-white">
-        WAI<span className="text-emerald-400">an</span>
+        WAI<span className="text-emerald-400">on</span>
       </span>
     </span>
   );

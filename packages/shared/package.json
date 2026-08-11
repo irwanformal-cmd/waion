@@ -2,7 +2,7 @@
   "name": "@wai/shared",
   "version": "0.1.0",
   "private": true,
-  "description": "Client-safe shared code for WAIan (types, schemas, API client). No server-only code.",
+  "description": "Client-safe shared code for WAIon (types, schemas, API client). No server-only code.",
   "type": "module",
   "main": "src/index.ts",
   "types": "src/index.ts",

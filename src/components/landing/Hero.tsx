@@ -43,8 +43,8 @@ export function Hero() {
           </h1>
 
           <p className="mt-6 max-w-xl text-lg leading-relaxed text-zinc-400">
-            Chat with leading AI models, keep every conversation saved and
-            searchable, and see exactly how many tokens you use. Hardened
+            Chat with leading AI models, keep every conversation saved to your
+            account, and see exactly how many tokens you use. Hardened
             authentication and server-side guardrails handle the rest.
           </p>
 
@@ -65,7 +65,7 @@ export function Hero() {
 
           <p className="mt-6 text-sm text-zinc-500">
             No credit card required. Free plan with a daily token budget.
-            Delete your account and data anytime.
+            Conversations belong to your account.
           </p>
         </div>
 
@@ -77,7 +77,7 @@ export function Hero() {
                 <span className="size-2.5 rounded-full bg-zinc-700" />
                 <span className="size-2.5 rounded-full bg-zinc-700" />
               </div>
-              <span className="text-xs text-zinc-500">wai.app/chat</span>
+              <span className="text-xs text-zinc-500">WAIon chat</span>
             </div>
             <div className="flex flex-col gap-3 p-4">
               <ChatBubble role="user" meta="~420 tokens">

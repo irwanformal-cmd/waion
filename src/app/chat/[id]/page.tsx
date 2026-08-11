@@ -1,5 +1,5 @@
 import { redirect, notFound } from "next/navigation";
-import { getSession } from "@/lib/auth/session";
+import { getSession, userToDto } from "@/lib/auth/session";
 import { getOwnedConversation, getOwnedMessages } from "@/lib/queries/conversations";
 import { toMessageDto } from "@/lib/chat/service";
 import { ChatClient } from "@/components/chat/ChatClient";
@@ -23,7 +23,7 @@ export default async function ChatPage({
 
   return (
     <>
-      <AppHeader />
+      <AppHeader user={userToDto(session.user)} />
       <div className="mx-auto flex h-[calc(100dvh-4rem)] w-full max-w-3xl flex-col px-4 pt-6 sm:px-6">
         <ChatClient
           conversationId={conversation.id}

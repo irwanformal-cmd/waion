@@ -39,7 +39,7 @@ export function Benefits() {
               One workspace for real work
             </h2>
             <p className="mt-3 max-w-xl text-lg leading-relaxed text-zinc-400">
-              Stop losing AI answers in browser tabs. WAIan keeps every
+              Stop losing AI answers in browser tabs. WAIon keeps every
               conversation organized, measured, and private, so AI output
               becomes work you can actually reuse.
             </p>

@@ -3,7 +3,7 @@
  * concepts (secrets, database, filesystem).
  */
 
-export const APP_NAME = "WAIan";
+export const APP_NAME = "WAIon";
 
 export const SESSION_COOKIE_NAME = "better-auth.session_token";
 

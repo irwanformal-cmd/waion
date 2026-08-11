@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { WaiClient, type ChatUsageDto, type MessageDto } from "@wai/shared";
+import { WaiClient, WaiApiError, type ChatUsageDto, type MessageDto } from "@wai/shared";
 
 interface LocalMessage {
   id: string;
@@ -16,6 +17,30 @@ interface LocalMessage {
 
 function formatTokens(n: number): string {
   return n.toLocaleString();
+}
+
+function isAuthError(err: unknown): boolean {
+  return (
+    err instanceof WaiApiError &&
+    (err.code === "UNAUTHENTICATED" || err.status === 401)
+  );
+}
+
+function errorMessage(err: unknown): string {
+  if (err instanceof WaiApiError) {
+    switch (err.code) {
+      case "RATE_LIMITED":
+      case "QUOTA_EXCEEDED":
+        return "You are out of quota right now. Try again later.";
+      case "PAYLOAD_TOO_LARGE":
+        return "That message is too long. Please shorten it and try again.";
+      case "INVALID_INPUT":
+        return "That message could not be sent. Please check it and try again.";
+      default:
+        return "Something went wrong. Please try again.";
+    }
+  }
+  return "Network error. Check your connection and try again.";
 }
 
 function Markdown({ content }: { content: string }) {
@@ -71,6 +96,7 @@ export function ChatClient({
   initialTitle: string;
   initialMessages: MessageDto[];
 }) {
+  const router = useRouter();
   const [messages, setMessages] = useState<LocalMessage[]>(
     initialMessages.map(toLocal),
   );
@@ -78,6 +104,8 @@ export function ChatClient({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [usage, setUsage] = useState<ChatUsageDto | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -87,15 +115,52 @@ export function ChatClient({
 
   useEffect(() => {
     const client = new WaiClient();
-    client.usage().then((u) => {
-      setUsage({
-        inputTokens: u.usedTokens,
-        outputTokens: 0,
-        usedTokensToday: u.usedTokens,
-        budgetTokens: u.budgetTokens,
+    client
+      .usage()
+      .then((u) => {
+        setUsage({
+          inputTokens: u.usedTokens,
+          outputTokens: 0,
+          usedTokensToday: u.usedTokens,
+          budgetTokens: u.budgetTokens,
+        });
+      })
+      .catch((err: unknown) => {
+        if (isAuthError(err)) {
+          router.replace("/login");
+        }
       });
-    }).catch(() => {});
-  }, []);
+  }, [router]);
+
+  async function createNewChat() {
+    try {
+      const client = new WaiClient();
+      const conversation = await client.createConversation();
+      router.push(`/chat/${conversation.id}`);
+    } catch (err) {
+      if (isAuthError(err)) {
+        router.replace("/login");
+        return;
+      }
+      setError(errorMessage(err));
+    }
+  }
+
+  async function deleteConversation() {
+    setDeleting(true);
+    try {
+      await new WaiClient().deleteConversation(conversationId);
+      router.push("/dashboard");
+      router.refresh();
+    } catch (err) {
+      setDeleting(false);
+      if (isAuthError(err)) {
+        router.replace("/login");
+        return;
+      }
+      setError("Failed to delete this conversation. Please try again.");
+    }
+  }
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -149,10 +214,16 @@ export function ChatClient({
           }
         },
       );
-    } catch {
-      setError("Something went wrong. Please try again.");
+    } catch (err) {
+      if (isAuthError(err)) {
+        router.replace("/login");
+        return;
+      }
+      setError(errorMessage(err));
     } finally {
-      setMessages((prev) => prev.filter((m) => m.streaming));
+      // Remove the streaming placeholder if the stream ended without a
+      // "done" event (failed or aborted), keep everything else.
+      setMessages((prev) => prev.filter((m) => !m.streaming));
       setBusy(false);
       textareaRef.current?.focus();
     }
@@ -164,11 +235,11 @@ export function ChatClient({
 
   return (
     <>
-      <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
+      <div className="flex items-center justify-between gap-2 border-b border-zinc-800 pb-3">
         <div className="flex min-w-0 items-center gap-3">
           <Link
             href="/dashboard"
-            className="shrink-0 text-sm text-zinc-500 transition-colors hover:text-zinc-200"
+            className="shrink-0 text-zinc-500 transition-colors hover:text-zinc-200"
             aria-label="Back to dashboard"
           >
             <svg aria-hidden="true" className="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -179,11 +250,56 @@ export function ChatClient({
             {initialTitle}
           </h1>
         </div>
-        {usage ? (
-          <span className="shrink-0 text-xs text-zinc-500">
-            {formatTokens(usage.usedTokensToday)} / {formatTokens(usage.budgetTokens)} tokens today
-          </span>
-        ) : null}
+        <div className="flex shrink-0 items-center gap-2">
+          {confirmDelete ? (
+            <div className="flex items-center gap-2 text-xs">
+              <span className="hidden text-zinc-500 sm:inline">Delete?</span>
+              <button
+                onClick={deleteConversation}
+                disabled={deleting}
+                className="rounded-md bg-red-600 px-2 py-1 font-medium text-white transition-colors hover:bg-red-500 disabled:opacity-60"
+              >
+                {deleting ? "Deleting..." : "Yes"}
+              </button>
+              <button
+                onClick={() => setConfirmDelete(false)}
+                disabled={deleting}
+                className="rounded-md border border-zinc-700 px-2 py-1 text-zinc-300 transition-colors hover:bg-zinc-800"
+              >
+                No
+              </button>
+            </div>
+          ) : (
+            <>
+              <button
+                onClick={() => setConfirmDelete(true)}
+                disabled={busy}
+                aria-label="Delete conversation"
+                title="Delete conversation"
+                className="rounded-md p-2 text-zinc-500 transition-colors hover:bg-zinc-800 hover:text-red-400 disabled:opacity-50"
+              >
+                <svg aria-hidden="true" className="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M3 6h18" />
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
+                  <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                  <line x1="10" y1="11" x2="10" y2="17" />
+                  <line x1="14" y1="11" x2="14" y2="17" />
+                </svg>
+              </button>
+              <button
+                onClick={createNewChat}
+                disabled={busy}
+                className="inline-flex h-8 items-center gap-1.5 rounded-md bg-emerald-600 px-3 text-sm font-medium text-white transition-colors hover:bg-emerald-500 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                <svg aria-hidden="true" className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 5v14" />
+                  <path d="M5 12h14" />
+                </svg>
+                <span className="hidden sm:inline">New chat</span>
+              </button>
+            </>
+          )}
+        </div>
       </div>
 
       <div ref={scrollRef} className="flex-1 overflow-y-auto py-4">
@@ -210,7 +326,7 @@ export function ChatClient({
                     <div className="prose-invert text-sm leading-relaxed">
                       <Markdown content={m.content || "..."} />
                       {m.streaming ? (
-                        <span className="ml-0.5 inline-flex gap-1">
+                        <span className="ml-0.5 inline-flex gap-1" aria-label="Thinking">
                           <span className="size-1.5 animate-bounce rounded-full bg-zinc-500 [animation-delay:0ms]" />
                           <span className="size-1.5 animate-bounce rounded-full bg-zinc-500 [animation-delay:150ms]" />
                           <span className="size-1.5 animate-bounce rounded-full bg-zinc-500 [animation-delay:300ms]" />
@@ -254,7 +370,7 @@ export function ChatClient({
             }}
             rows={1}
             maxLength={16000}
-            placeholder="Message WAIan..."
+            placeholder="Message WAIon..."
             disabled={busy}
             className="max-h-40 min-h-10 flex-1 resize-y rounded-md border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-white outline-none transition-colors focus:border-emerald-500 disabled:opacity-60"
           />

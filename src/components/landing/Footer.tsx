@@ -60,7 +60,7 @@ export function Footer() {
         </div>
         <div className="mt-12 flex flex-col items-center justify-between gap-3 border-t border-zinc-800 pt-6 sm:flex-row">
           <p className="text-xs text-zinc-600">
-            © {new Date().getFullYear()} WAIan. All rights reserved.
+            © {new Date().getFullYear()} WAIon. All rights reserved.
           </p>
           <p className="text-xs text-zinc-600">
             No plaintext passwords. Keys never leave the server.

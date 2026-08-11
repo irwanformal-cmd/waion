@@ -121,7 +121,7 @@ async function registerAndSignIn(email: string): Promise<{ jar: CookieJar; userI
 }
 
 async function main() {
-  console.log(`\nWAIan API tests → ${BASE}\n`);
+  console.log(`\nWAIon API tests → ${BASE}\n`);
 
   // --- Authentication -------------------------------------------------------
   console.log("[auth]");
@@ -290,6 +290,29 @@ async function main() {
     check("sign-out works", out.status === 200, `got ${out.status}`);
     const session = await api(a.jar, "/api/auth/get-session");
     check("session invalidated after logout", session.body === null);
+
+    const page = await fetch(`${BASE}/dashboard`, { redirect: "manual" });
+    check(
+      "unauthenticated /dashboard redirects to login",
+      page.status === 307 && (page.headers.get("location") ?? "").includes("/login"),
+      `got ${page.status} -> ${page.headers.get("location") ?? ""}`,
+    );
+
+    const signinAgain = await api(null, "/api/auth/sign-in/email", {
+      method: "POST",
+      body: JSON.stringify({ email: emails.a, password }),
+    });
+    check("user can sign in again after logout", signinAgain.status === 200, `got ${signinAgain.status}`);
+
+    const freshJar = new CookieJar();
+    freshJar.setFromResponse(new Response(null, { headers: signinAgain.headers }));
+    const freshSession = await api(freshJar, "/api/auth/get-session");
+    const freshUser = (freshSession.body as { user?: { email?: string } } | null)?.user;
+    check(
+      "authenticated request works with the new session",
+      freshSession.status === 200 && freshUser?.email === emails.a,
+      `got ${freshSession.status}`,
+    );
   }
 
   // --- Secrets never leak ---------------------------------------------------

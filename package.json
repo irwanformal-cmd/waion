@@ -13,7 +13,8 @@
     "db:studio": "drizzle-kit studio",
     "db:verify": "tsx scripts/verify-db.ts",
     "test:api": "tsx scripts/test-api.ts",
-    "create-admin": "tsx scripts/create-admin.ts"
+    "create-admin": "tsx scripts/create-admin.ts",
+    "smoke:ui": "tsx scripts/ui-smoke.mts"
   },
   "dependencies": {
     "better-auth": "^1.6.26",

@@ -42,7 +42,7 @@ export function AiSection() {
               How the AI layer stays safe
             </h2>
             <p className="mt-3 text-lg leading-relaxed text-zinc-400">
-              AI endpoints are expensive and heavily attacked. WAIan treats
+              AI endpoints are expensive and heavily attacked. WAIon treats
               every message as untrusted input and runs each request through
               server-side controls before, during, and after the model call.
             </p>

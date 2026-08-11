@@ -1,5 +1,5 @@
 import "server-only";
-import { eq } from "drizzle-orm";
+import { count, eq } from "drizzle-orm";
 import { withTransaction } from "@/lib/db";
 import { conversations, messages, usageEvents } from "@/lib/db/schema";
 import type {
@@ -68,6 +68,12 @@ export async function persistChat({
   budgetTokens: number;
 }): Promise<ChatResultDto> {
   const result = await withTransaction(async (tx) => {
+    const rows = await tx
+      .select({ value: count() })
+      .from(messages)
+      .where(eq(messages.conversationId, conversationId));
+    const existingMessages = rows[0]?.value ?? 0;
+
     const [userMessage] = await tx
       .insert(messages)
       .values({
@@ -98,9 +104,16 @@ export async function persistChat({
       tokensOut: outputTokens,
     });
 
+    // Retitle empty conversations (created via "New chat") from the first
+    // message. Conversations that already have history keep their title.
     await tx
       .update(conversations)
-      .set({ updatedAt: new Date() })
+      .set({
+        updatedAt: new Date(),
+        ...(existingMessages === 0
+          ? { title: firstMessageTitle(userContent) }
+          : {}),
+      })
       .where(eq(conversations.id, conversationId));
 
     return { userMessage, assistantMessage };

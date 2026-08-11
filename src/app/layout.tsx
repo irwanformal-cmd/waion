@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "WAIan: secure AI workbench",
+  title: "WAIon: secure AI workbench",
   description:
     "Chat with leading AI models in a secure, production-grade workspace. Saved conversations, transparent usage, and server-side guardrails.",
 };

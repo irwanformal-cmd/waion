@@ -11,7 +11,7 @@ export function Navbar() {
   return (
     <header className="sticky top-0 z-50 border-b border-zinc-800 bg-zinc-950/90 backdrop-blur">
       <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        <Link href="/" aria-label="WAIan home">
+        <Link href="/" aria-label="WAIon home">
           <Logo />
         </Link>
 

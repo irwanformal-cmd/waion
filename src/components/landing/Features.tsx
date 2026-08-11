@@ -27,7 +27,7 @@ const FEATURES = [
   {
     title: "Privacy by design",
     description:
-      "Delete your account and every message, conversation, and usage record goes with it.",
+      "Every conversation is scoped to your account and never shared. Usage is tracked transparently against your daily budget.",
   },
 ];
 
