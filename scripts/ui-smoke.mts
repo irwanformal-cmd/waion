@@ -33,10 +33,14 @@ const pw = "correct-horse-battery-staple";
 const jar = new Jar();
 
 console.log("\n[1-2] landing + pages");
-ok("GET /", (await fetch(`${BASE}/`)).status === 200);
+const homeRes = await fetch(`${BASE}/`);
+const homeHtml = await homeRes.text();
+ok("GET /", homeRes.status === 200);
 for (const p of ["/security", "/privacy", "/terms"]) {
   ok(`GET ${p}`, (await fetch(`${BASE}${p}`)).status === 200);
 }
+const waEnabled = !!(process.env.NEXT_PUBLIC_SUPPORT_WHATSAPP ?? "").trim();
+ok("support: wa.me link iff NEXT_PUBLIC_SUPPORT_WHATSAPP set", homeHtml.includes("wa.me") === waEnabled);
 
 console.log("\n[3] sign up + verify");
 const up = await req(null, "/api/auth/sign-up/email", { method: "POST", body: JSON.stringify({ email, password: pw, name: "UI Test" }) });
@@ -56,6 +60,7 @@ const dash = await req(jar, "/dashboard");
 const dashHtml = await dash.text();
 ok("GET /dashboard (auth)", dash.status === 200 && dashHtml.includes("Hello"), `got ${dash.status}`);
 ok("dashboard shows email", dashHtml.includes(email));
+ok("support: dashboard support link iff configured", dashHtml.includes("wa.me") === waEnabled);
 const anonDash = await fetch(`${BASE}/dashboard`, { redirect: "manual" });
 ok("anon /dashboard -> /login", anonDash.status === 307 && (anonDash.headers.get("location") ?? "").includes("/login"));
 const loggedInLogin = await req(jar, "/login");

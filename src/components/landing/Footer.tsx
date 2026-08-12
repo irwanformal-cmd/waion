@@ -1,4 +1,5 @@
 import { Logo } from "@/components/landing/Logo";
+import { getWhatsAppSupportHref } from "@/lib/support/whatsapp";
 
 const FOOTER_COLUMNS = [
   {
@@ -28,6 +29,8 @@ const FOOTER_COLUMNS = [
 ];
 
 export function Footer() {
+  const supportHref = getWhatsAppSupportHref();
+
   return (
     <footer className="border-t border-zinc-800 py-14">
       <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
@@ -54,6 +57,18 @@ export function Footer() {
                     </a>
                   </li>
                 ))}
+                {column.title === "Company" && supportHref ? (
+                  <li>
+                    <a
+                      href={supportHref}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm text-zinc-500 transition-colors hover:text-emerald-400"
+                    >
+                      Contact support
+                    </a>
+                  </li>
+                ) : null}
               </ul>
             </div>
           ))}
