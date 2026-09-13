@@ -44,3 +44,19 @@ architecture, threat model, and audit results. Key rules:
 - AI provider keys live only in server-side environment variables.
 - See `AGENTS.md` before writing code — this repo pins Next.js 16, which has
   breaking changes vs. older versions (e.g. `proxy.ts` replaces `middleware.ts`).
+
+---
+
+## Demo
+
+![Demo](assets/demo.gif)
+
+## Contributors
+
+Thanks to everyone who builds with this project! 🙏
+
+<a href="https://github.com/irwanformal-cmd">
+  <img src="https://github.com/irwanformal-cmd.png?size=100" width="50" height="50" style="border-radius:50%" alt="irwanformal-cmd" />
+</a>
+
+**[@irwanformal-cmd](https://github.com/irwanformal-cmd)** — creator & maintainer
